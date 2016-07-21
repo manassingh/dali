@@ -1,58 +1,103 @@
-var catNames = ['Tom','Luccy','Pussy','Rug','Bill'];
-var catsList=[];
-
-for(var i=0;i<5;i++){
-	var cat={};
-	cat.name=catNames[i];
-	cat.count=0;
-	cat.index=i;
-	var imgPath='img/cat' + (i+1) + '.jpg'
-	cat.img=imgPath;
-	catsList.push(cat);
-}
-
-var nameLable=document.getElementById('catName');
-var countLable=document.getElementById('catCount');
-var catImg=document.getElementById('catImg');
-
-nameLable.innerHTML=catsList[0].name;
-catImg.src=catsList[0].img;
-catImg.id=catsList[0].index;
-countLable.innerHTML=catsList[0].count;
-
-var increaseCount = function(event){
-	catsList[event.id].count++;
-	countLable.innerHTML=catsList[event.id].count;
+//=======model=======//
+var model={
+	currentCat:null,
+	init: function(){
+		//creating data for cat list
+	 	this.catNames = ['Tom','Luccy','Pussy','Rug','Bill'];
+		this.catsList=[]; //final list having cat objects
+		for(var i=0;i<5;i++){
+			var cat={};
+			cat.name=this.catNames[i];
+			cat.count=0;
+			cat.index=i;
+			var imgPath='img/cat' + (i+1) + '.jpg'
+			cat.img=imgPath;
+			this.catsList.push(cat);
+		}
+	}
 };
 
-function makeCatList(array) {
-    // Create the list element:
-    var list = document.createElement('ul');
+//=========octopus======//
+var octopus={
+	init:function(){
+		model.init();
+		model.currentCat=model.catsList[0];
+		catListView.init();
+		catView.init();
+	},
+	incrementCounter: function(){
+		model.currentCat.count++;
+		catView.render();
+	},
+	getCat:function(){
+		return model.currentCat;
+	},
+	getCats: function(){
+		return model.catsList;
+	},
+	setCurrentCat: function(cat){
+		model.currentCat=cat;
+	}
+};
 
-    for(var i = 0; i < array.length; i++) {
-        // Create the list item:
-        var item = document.createElement('li');
+//=======view========//
+var catView = {
+	//geting dom objects
+	init: function(){
+		this.nameLable=document.getElementById('catName');
+		this.countLable=document.getElementById('catCount');
+		this.catImg=document.getElementById('catImg');
 
-        // Set its contents:
-        item.appendChild(document.createTextNode(array[i]));
+		 // on click, increment the current cat's counter
+        this.catImg.addEventListener('click', function(){
+            octopus.incrementCounter();
+        });
 
-        //add click event listner
-        item.addEventListener('click',(function(num){
-        	return function() {
-		        nameLable.innerHTML=catsList[num].name;
-		        catImg.src=catsList[num].img;
-		        catImg.id=catsList[num].index;
-		        countLable.innerHTML=catsList[num].count;
-		    };
-        })(i),false);
+        this.render();
+		
+	},
+	render: function(){
+		var cat=octopus.getCat();
+		this.nameLable.innerHTML=cat.name;
+		this.catImg.src=cat.img;
+		this.catImg.id=cat.index;
+		this.countLable.innerHTML=cat.count;
+	}
+};
 
-        // Add it to the list:
-        list.appendChild(item);
-    }
+var catListView={
+	init: function(){
+		// Add the contents of options[0] to #foo:
+		this.catNameList=document.getElementById('catList');
+		
+		this.render();
+	},
+	render: function(){
+		var list = document.createElement('ul');
+		var cats = octopus.getCats();
+	    for(var i = 0; i < cats.length; i++) {
+	        // Create the list item:
+	        var item = document.createElement('li');
 
-    // Finally, return the constructed list:
-    return list;
-}
+	        // Set its contents:
+	        item.appendChild(document.createTextNode(cats[i].name));
 
-// Add the contents of options[0] to #foo:
-document.getElementById('catList').appendChild(makeCatList(catNames));
+	        //add click event listner
+	        item.addEventListener('click',(function(catCopy){
+	        	return function() {
+			        octopus.setCurrentCat(catCopy);
+			        catView.render();
+			    };
+	        })(cats[i]),false);
+
+	        // Add it to the list:
+	        list.appendChild(item);
+	    }
+	    this.catNameList.appendChild(list);
+	}
+};
+
+octopus.init();
+
+
+
