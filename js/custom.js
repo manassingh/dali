@@ -37,6 +37,49 @@ var octopus={
 	},
 	setCurrentCat: function(cat){
 		model.currentCat=cat;
+	},
+	showAdminArea: function(adminArea){
+		adminArea.style.display="block";
+	},
+	hideAdminArea: function(adminArea){
+		adminArea.style.display="none";
+	},
+	clearInputValues: function(nameInput,countInput){
+		nameInput.value='';
+		countInput.value='';
+	},
+	cancle: function(nameInput,countInput,adminArea){
+		this.clearInputValues(nameInput,countInput);
+		this.hideAdminArea(adminArea);
+	},
+	validation: function(nameInput,countInput){
+		if (nameInput.value == null || nameInput.value == "") {
+	        alert("Name must be filled out");
+	        return false;
+	    }
+		if (isNaN(countInput.value) || countInput.value < 0 || countInput.value=="") {
+	        alert("count must be number and must be greater than 0");
+	        return false;
+	    } 
+	    return true;
+	},
+	toggleView: function(nameInput,countInput,adminArea){
+		if(adminArea.style.display=="block"){
+			this.cancle(nameInput,countInput,adminArea);
+		}else{
+			this.showAdminArea(adminArea);
+		}
+	},
+	chaneValue: function(nameInput,countInput,adminArea){
+		if(this.validation(nameInput,countInput)){
+			model.currentCat.count=countInput.value;
+			model.currentCat.name=nameInput.value;
+			catView.render();
+			catListView.render();
+			this.clearInputValues(nameInput,countInput);
+			this.hideAdminArea(adminArea);
+		}
+		
 	}
 };
 
@@ -47,10 +90,30 @@ var catView = {
 		this.nameLable=document.getElementById('catName');
 		this.countLable=document.getElementById('catCount');
 		this.catImg=document.getElementById('catImg');
-
+		this.cancleBt=document.getElementById('cancle');
+		this.submitBt=document.getElementById('submit');
+		this.adminBt=document.getElementById('admin');
+		this.adminArea=document.getElementById('adminArea');
+		this.nameInput=document.getElementById('adminArea');
+		this.countInput=document.getElementById('adminArea');
 		 // on click, increment the current cat's counter
         this.catImg.addEventListener('click', function(){
             octopus.incrementCounter();
+        });
+
+        //on click, show admin area
+        this.adminBt.addEventListener('click',function(){
+        	octopus.toggleView(nameInput,countInput,adminArea);
+        });
+
+        //onclick change cat name and count
+        this.submitBt.addEventListener('click',function(){
+        	octopus.chaneValue(nameInput,countInput,adminArea);
+        });
+
+        //on click clear input values and hide admin area
+        this.cancleBt.addEventListener('click',function(){
+        	octopus.cancle(nameInput,countInput,adminArea);
         });
 
         this.render();
@@ -73,6 +136,9 @@ var catListView={
 		this.render();
 	},
 	render: function(){
+		while (this.catNameList.hasChildNodes()) {   
+		    this.catNameList.removeChild(this.catNameList.firstChild);
+		}
 		var list = document.createElement('ul');
 		var cats = octopus.getCats();
 	    for(var i = 0; i < cats.length; i++) {
